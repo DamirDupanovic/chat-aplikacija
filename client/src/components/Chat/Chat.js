@@ -34,21 +34,26 @@ const Chat = ({location}) => {
         setName(name);
         setRoom(room);
 
-        socket.emit('join', {name, room}, () => {
-            
+        socket.emit('join', {name, room}, (error) => {
+            if(error){
+                alert(error);
+                window.location.href='/';
+            }
         });
+    }, [ENDPOINT, location.search]);
+
+    useEffect(() => {
+        socket.on('message', (message) => {
+            setMessages([...messages, message]);
+        });
+
+        
 
         return () => {
             socket.emit('disconnect');
 
             socket.off();
         }
-    }, [ENDPOINT, location.search]);
-
-    useEffect(() => {
-        socket.on('message', (message) => {
-            setMessages([...messages, message]);
-        })
     }, [messages]);
 
     //funkcija za slanje poruka
@@ -66,10 +71,10 @@ const Chat = ({location}) => {
             <div className="container">
                 <InfoBar room ={room}/>
                 <Messages messages={messages} name={name}/>
-                <Input  setMessage={setMessage} sendMessage={sendMessage}/>
+                <Input  message={message} setMessage={setMessage} sendMessage={sendMessage}/>
             </div>
         </div>
-    )
+    );  
 }
 
 export default Chat;
